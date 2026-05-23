@@ -1,52 +1,55 @@
-# ─────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════
 # WalkWithJesus — Render Production Dependencies
-# Ecosystem generation: LangChain 1.x / openai 1.9x
-# Python: 3.11
-# Verified: May 2026
+# Python 3.11 | Render | MongoDB Atlas | OpenAI Embeddings
 #
-# IMPORTANT: Do NOT mix 0.3.x and 1.x LangChain packages.
-# All langchain-* packages must be from the same generation.
-# ─────────────────────────────────────────────────────────────
+# Dependency graph generation: LangChain 0.3.x + openai 1.x
+#
+# WHY 0.3.x and NOT 1.2.x:
+#   langchain-openai 1.2.x requires openai>=2.26 (new openai 2.x SDK)
+#   langchain-openai 0.3.x requires openai<2.0.0 (stable openai 1.x SDK)
+#   The openai 2.x SDK is a breaking rewrite — not appropriate for a
+#   stable production RAG backend. 0.3.x is the correct stable target.
+#
+# VERIFIED CONSTRAINT CHAIN:
+#   langchain-openai==0.3.16  -> langchain-core<1.0.0,>=0.3.53
+#                             -> openai<2.0.0,>=1.68.2
+#   langchain==0.3.27         -> langchain-core<1.0.0,>=0.3.66
+#   langchain-mongodb==0.10.0 -> langchain-core (compatible 0.3.x range)
+#   openai==1.93.0            -> satisfies >=1.68.2,<2.0.0
+#
+# DO NOT pin langchain-core explicitly.
+# DO NOT use langchain-openai>=1.0 with openai 1.x.
+# DO NOT mix 0.3.x and 1.x langchain packages.
+# ═══════════════════════════════════════════════════════════════
 
-# ── Web framework ─────────────────────────────────────────────
+# Web framework
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
 
-# ── Config & validation ───────────────────────────────────────
+# Config & validation
 pydantic==2.9.2
 pydantic-settings==2.5.2
 
-# ── LangChain 1.x ecosystem ──────────────────────────────────
-# These three must be from the same major generation.
-# Do NOT pin langchain-core to a specific patch — let pip
-# resolve it within the range that langchain-openai declares.
-# Pinning langchain-core too low is exactly what caused your
-# previous ResolutionImpossible error.
-langchain==1.2.18
-langchain-openai==1.2.1
-# langchain-core is intentionally NOT pinned here.
-# langchain-openai and langchain declare compatible ranges;
-# letting pip resolve the floor avoids the manual mismatch.
+# LangChain 0.3.x ecosystem (openai 1.x compatible)
+langchain==0.3.27
+langchain-openai==0.3.16
+# langchain-core is intentionally unpinned.
+# langchain and langchain-openai declare compatible floors.
+# Letting pip resolve prevents ResolutionImpossible errors.
 
-# ── MongoDB vectorstore ───────────────────────────────────────
-# langchain-mongodb is the official maintained replacement for
-# langchain-community's MongoDBAtlasVectorSearch.
-# It tracks the same langchain-core major version.
+# MongoDB vectorstore (official replacement for langchain-community)
 langchain-mongodb==0.10.0
 
-# ── OpenAI ────────────────────────────────────────────────────
-# langchain-openai 1.2.x requires openai>=1.86.0.
-# Pin to a specific stable release to prevent Render from
-# silently pulling a newer version that could break things.
-openai==1.90.0
+# OpenAI SDK
+# Must be >=1.68.2 and <2.0.0 to satisfy langchain-openai 0.3.x.
+# Pinned so Render cannot silently resolve a future 2.x release.
+openai==1.93.0
 
-# ── MongoDB driver ────────────────────────────────────────────
-# 4.8.x is the last stable series before the TLS regressions
-# you experienced locally. Do NOT use 4.17.x on Render.
+# MongoDB driver
 pymongo==4.8.0
 dnspython==2.7.0
 
-# ── Utilities ─────────────────────────────────────────────────
+# Utilities
 tiktoken==0.9.0
 python-dotenv==1.0.1
 certifi==2025.4.26
