@@ -3,17 +3,16 @@ uvicorn==0.30.6
 pydantic==2.9.2
 pydantic-settings==2.5.2
 
-openai==1.30.5
+openai==1.25.2
 
 langchain==0.1.20
 langchain-community==0.0.38
 langchain-core==0.1.52
-langchain-openai==0.1.6
 
-pymongo==4.17.0
+pymongo==4.6.3
 dnspython==2.7.0
 python-dotenv==1.0.1
 
 tiktoken==0.7.0
 numpy==1.26.4
-certifi==2025.8.3
+certifi==2024.2.2
