@@ -87,9 +87,18 @@
 #             )
 
 #         return results
+import os
+from pathlib import Path
 from pymongo import MongoClient
-from langchain_mongodb import MongoDBAtlasVectorSearch
-from langchain_openai import OpenAIEmbeddings
+from dotenv import load_dotenv
+
+# ── OLD ECOSYSTEM IMPORTS ──────────────────────────────────────
+# langchain-community==0.0.38 contains MongoDBAtlasVectorSearch.
+# langchain==0.1.20 contains OpenAIEmbeddings directly.
+# No langchain-openai. No langchain-mongodb. Nothing modern.
+from langchain_community.vectorstores import MongoDBAtlasVectorSearch
+from langchain.embeddings.openai import OpenAIEmbeddings
+# ──────────────────────────────────────────────────────────────
 
 from app.core.config import Settings
 from app.models.schemas import ScriptureResult
@@ -97,7 +106,7 @@ from app.models.schemas import ScriptureResult
 
 class RetrievalService:
     """
-    Wraps MongoDB Atlas vector search.
+    Wraps MongoDB Atlas vector search using the old LangChain ecosystem.
     Created once at startup via lru_cache in dependencies.py.
     """
 
@@ -114,16 +123,13 @@ class RetrievalService:
             self._settings.COLLECTION_NAME
         ]
 
-        # OpenAIEmbeddings in langchain-openai 0.3.x
-        # - Reads OPENAI_API_KEY from environment automatically.
-        # - No proxies error: 0.3.x uses the openai 1.x client cleanly.
-        # - model pinned explicitly to avoid surprises on OpenAI default changes.
-        embeddings = OpenAIEmbeddings(
-            model="text-embedding-ada-002"
-        )
+        # OpenAIEmbeddings from langchain==0.1.20 (not langchain-openai).
+        # With openai==1.25.2, this initializes cleanly — no proxies error,
+        # no AsyncOpenAI import issues.
+        # openai_api_key is read from OPENAI_API_KEY env var automatically
+        # by the LangChain 0.1.x pydantic v1 validator.
+        embeddings = OpenAIEmbeddings()
 
-        # langchain-mongodb replaces langchain-community MongoDBAtlasVectorSearch.
-        # Same constructor API — drop-in replacement.
         return MongoDBAtlasVectorSearch(
             collection=collection,
             embedding=embeddings,
@@ -136,6 +142,10 @@ class RetrievalService:
         feeling_filter: str | None = None,
         k: int = 4,
     ) -> list[ScriptureResult]:
+        """
+        Semantic retrieval with optional metadata filtering.
+        similarity_search_with_score exists in langchain-community==0.0.38.
+        """
         pre_filter: dict = {}
         if feeling_filter:
             pre_filter["feeling"] = feeling_filter.strip().title()
