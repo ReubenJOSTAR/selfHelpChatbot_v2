@@ -1,51 +1,19 @@
-# ═══════════════════════════════════════════════════════════════
-# WalkWithJesus — Render Production Dependencies
-# FROZEN STABLE STACK — do not upgrade any package
-# Python 3.11 | Render | MongoDB Atlas | langchain-community
-#
-# Two corrections from the requested stack:
-#
-# 1. pydantic downgraded from 2.9.2 → 1.10.21
-#    langchain==0.1.20 and langchain-community==0.0.38 use pydantic v1
-#    internally. Running them against pydantic v2 triggers the confirmed
-#    __modify_schema__ bug in MongoDBAtlasVectorSearch + OpenAIEmbeddings.
-#    pydantic-settings 2.x can run on top of pydantic v1 compat shims
-#    but the simplest fix is to stay on pydantic v1 entirely.
-#
-# 2. openai upgraded from 0.28.1 → 1.25.2
-#    openai 0.28.x uses openai.ChatCompletion.create (synchronous, deprecated).
-#    The generation_service.py uses AsyncOpenAI() which only exists in openai>=1.0.
-#    openai 1.25.2 is the last 1.x release before the proxies removal that
-#    caused the original TLSV1 error — it is the known-good stable 1.x version
-#    for langchain-community==0.0.38.
-#
-# Everything else is exactly as you specified.
-# ═══════════════════════════════════════════════════════════════
-
-# Web framework
 fastapi==0.115.0
-uvicorn[standard]==0.30.6
-
-# Config & validation
-# pydantic v1 — required by langchain==0.1.20 internals
-pydantic==1.10.21
+uvicorn==0.30.6
+pydantic==2.9.2
 pydantic-settings==2.5.2
 
-# OpenAI SDK — 1.x client (AsyncOpenAI, OpenAIEmbeddings work correctly)
-# 1.25.2 is the last version before the proxies kwarg was removed
-openai==1.25.2
+openai==1.30.5
 
-# LangChain OLD ecosystem — no langchain-openai, no langchain-mongodb
 langchain==0.1.20
 langchain-community==0.0.38
 langchain-core==0.1.52
+langchain-openai==0.1.6
 
-# MongoDB driver
-pymongo==4.6.3
+pymongo==4.17.0
 dnspython==2.7.0
-
-# Utilities
 python-dotenv==1.0.1
-numpy==1.26.4
+
 tiktoken==0.7.0
-certifi==2024.2.2
+numpy==1.26.4
+certifi==2025.8.3
