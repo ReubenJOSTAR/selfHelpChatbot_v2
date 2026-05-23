@@ -1,19 +1,20 @@
 # 
 from pymongo import MongoClient
 
-# ─── THE KEY CHANGE ───────────────────────────────────────────
-# OLD: from langchain_community.vectorstores import MongoDBAtlasVectorSearch
-# NEW: from langchain_mongodb import MongoDBAtlasVectorSearch
+# ── THE CORRECT IMPORTS FOR LANGCHAIN 1.x ─────────────────────
 #
-# WHY: langchain-community's MongoDBAtlasVectorSearch is deprecated and was
-# written against older LangChain internals. langchain-mongodb is the official
-# first-party replacement maintained by MongoDB. Same API surface — it's a
-# drop-in for our use case.
+# OLD (0.3.x era, deprecated):
+#   from langchain_community.vectorstores import MongoDBAtlasVectorSearch
+#
+# ALSO OLD (0.2.x era, what previous advice told you):
+#   from langchain_mongodb import MongoDBAtlasVectorSearch  # version 0.3.0
+#
+# CORRECT (LangChain 1.x era):
+#   from langchain_mongodb import MongoDBAtlasVectorSearch  # version 0.10.0
+#
+# The import path is identical — only the package version changes.
 # ──────────────────────────────────────────────────────────────
 from langchain_mongodb import MongoDBAtlasVectorSearch
-
-# langchain-openai>=0.2 initializes OpenAIEmbeddings using the new
-# openai>=1.40 client interface — no `proxies` argument, no crash.
 from langchain_openai import OpenAIEmbeddings
 
 from app.core.config import Settings
@@ -24,8 +25,8 @@ class RetrievalService:
     """
     Wraps MongoDB Atlas vector search.
 
-    Connection is created once at startup via dependency injection
-    and reused on every request.
+    Instance is created once at startup via dependency injection
+    (lru_cache in dependencies.py) and reused on every request.
     """
 
     def __init__(self, settings: Settings):
@@ -41,20 +42,17 @@ class RetrievalService:
             self._settings.COLLECTION_NAME
         ]
 
-        # ─── OpenAIEmbeddings — no kwargs needed ─────────────────
-        # With langchain-openai>=0.2 + openai>=1.40, the client is
-        # initialized internally without the `proxies` argument.
-        # Do NOT pass openai_api_key here — pydantic-settings reads
-        # it from the environment automatically via OPENAI_API_KEY.
-        # Passing it explicitly can trigger validation conflicts in
-        # some pydantic v1/v2 bridge scenarios.
+        # ── OpenAIEmbeddings in LangChain 1.x ─────────────────
+        # - No openai_api_key kwarg needed: pydantic-settings reads
+        #   OPENAI_API_KEY from the environment automatically.
+        # - No proxies error: langchain-openai 1.x uses the
+        #   openai 1.8x+ client interface cleanly.
+        # - model is pinned explicitly to avoid surprises if OpenAI
+        #   changes the default in a future API update.
         embeddings = OpenAIEmbeddings(
-            model="text-embedding-ada-002"   # explicit is better than implicit
+            model="text-embedding-ada-002"
         )
 
-        # ─── langchain-mongodb vectorstore ───────────────────────
-        # MongoDBAtlasVectorSearch from langchain_mongodb accepts the
-        # same constructor arguments as the old community version.
         return MongoDBAtlasVectorSearch(
             collection=collection,
             embedding=embeddings,

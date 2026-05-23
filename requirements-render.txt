@@ -1,36 +1,53 @@
-# ─────────────────────────────────────────────
-# WalkWithJesus — Backend Dependencies
-# Validated compatible stack for Render / Python 3.11
-# Last verified: May 2026
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+# WalkWithJesus — Render Production Dependencies
+# Ecosystem generation: LangChain 1.x / openai 1.9x
+# Python: 3.11
+# Verified: May 2026
+#
+# IMPORTANT: Do NOT mix 0.3.x and 1.x LangChain packages.
+# All langchain-* packages must be from the same generation.
+# ─────────────────────────────────────────────────────────────
 
-# Web framework
+# ── Web framework ─────────────────────────────────────────────
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
 
-# Config & validation
+# ── Config & validation ───────────────────────────────────────
 pydantic==2.9.2
 pydantic-settings==2.5.2
 
-# OpenAI — must be >=1.40 to match langchain-openai>=0.2
-# 1.30.x removed `proxies`; langchain-openai>=0.2 targets the new interface cleanly
-openai==1.51.0
+# ── LangChain 1.x ecosystem ──────────────────────────────────
+# These three must be from the same major generation.
+# Do NOT pin langchain-core to a specific patch — let pip
+# resolve it within the range that langchain-openai declares.
+# Pinning langchain-core too low is exactly what caused your
+# previous ResolutionImpossible error.
+langchain==1.2.18
+langchain-openai==1.2.1
+# langchain-core is intentionally NOT pinned here.
+# langchain-openai and langchain declare compatible ranges;
+# letting pip resolve the floor avoids the manual mismatch.
 
-# LangChain — upgraded to current stable (0.3.x series)
-# langchain-openai>=0.2 no longer passes `proxies` to the OpenAI client
-langchain==0.3.7
-langchain-core==0.3.15
-langchain-openai==0.2.9
+# ── MongoDB vectorstore ───────────────────────────────────────
+# langchain-mongodb is the official maintained replacement for
+# langchain-community's MongoDBAtlasVectorSearch.
+# It tracks the same langchain-core major version.
+langchain-mongodb==0.10.0
 
-# MongoDB — use langchain-mongodb instead of langchain-community for vectorstore
-# langchain-community MongoDBAtlasVectorSearch is deprecated upstream
-# langchain-mongodb is the official maintained replacement
-langchain-mongodb==0.3.0
-pymongo==4.8.0          # 4.8 is stable; avoids the TLS regression in 4.17
+# ── OpenAI ────────────────────────────────────────────────────
+# langchain-openai 1.2.x requires openai>=1.86.0.
+# Pin to a specific stable release to prevent Render from
+# silently pulling a newer version that could break things.
+openai==1.90.0
+
+# ── MongoDB driver ────────────────────────────────────────────
+# 4.8.x is the last stable series before the TLS regressions
+# you experienced locally. Do NOT use 4.17.x on Render.
+pymongo==4.8.0
 dnspython==2.7.0
 
-# Utilities
+# ── Utilities ─────────────────────────────────────────────────
+tiktoken==0.9.0
 python-dotenv==1.0.1
-certifi==2024.8.30
+certifi==2025.4.26
 numpy==1.26.4
-tiktoken==0.7.0
