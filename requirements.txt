@@ -1,0 +1,20 @@
+# Web framework
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+
+# Config & validation
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# OpenAI
+openai>=1.0.0
+langchain-openai>=0.1.0
+
+# LangChain + MongoDB
+langchain>=0.2.0
+langchain-community>=0.2.0
+pymongo>=4.6.0,<4.7.0      # pinned — 4.17 caused your TLS issues
+certifi>=2024.0.0
+
+# Environment
+python-dotenv>=1.0.0
