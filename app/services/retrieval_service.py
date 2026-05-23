@@ -35,9 +35,10 @@ class RetrievalService:
             self._settings.COLLECTION_NAME
         ]
 
-        embeddings = OpenAIEmbeddings(
-            openai_api_key=self._settings.OPENAI_API_KEY
-        )
+        # embeddings = OpenAIEmbeddings(
+        #     openai_api_key=self._settings.OPENAI_API_KEY
+        # )
+        embeddings = OpenAIEmbeddings()
 
         return MongoDBAtlasVectorSearch(
             collection=collection,
