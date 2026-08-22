@@ -1,7 +1,12 @@
-from fastapi import FastAPI
+import logging
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.routes import chat
+
+logging.basicConfig(level=logging.INFO)
 
 
 def create_app() -> FastAPI:
@@ -52,6 +57,14 @@ def create_app() -> FastAPI:
         prefix="/api",
         tags=["Chat"],
     )
+
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request: Request, exc: Exception):
+        logging.getLogger(__name__).exception("Unhandled error")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": str(exc)},
+        )
 
     return app
 
