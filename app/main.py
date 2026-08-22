@@ -31,7 +31,10 @@ def create_app() -> FastAPI:
     # ---------------------------------------------------
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],          # Replace with ["https://yourfrontend.com"] in prod
+        allow_origins=[
+            "https://walkwithjesus.vercel.app",
+            "http://localhost:3000",
+        ],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
